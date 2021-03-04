@@ -1,0 +1,69 @@
+Presentation of Stat2data
+========================================================
+author: Huijin Yu 
+date: 2021/3/03
+autosize: true
+font-import: https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap
+font-family: 'Akaya Kanadaka' 
+css:custom.css
+
+First Slide
+========================================================
+type: exclaim
+incremental:true
+For more details on Stat2data package presentations please visit [link](https://cran.r-project.org/web/packages/Stat2Data/index.html).
+
+- Package:	Stat2Data
+<li class="fragment fade-in " > Type:	Package </li>
+<code>
+- Version:	2.0.0
+- Date:	2018-12-29
+- License:	GPL-2
+</code>
+- LazyLoad:	yes
+
+Description:
+This package included datasets for both the first and second editions of the text.
+Datasets for Stat2: Modeling with Regression and ANOVA (second edition) and Stat2: Building Models for a World of Data (first edition)
+
+
+
+
+plots
+========================================================
+plots of Diamond dataset:
+Price and characteristics for a sample of 351 diamonds
+
+```{r, echo=FALSE }
+library(Stat2Data)
+data(Diamonds)
+diadata<-Diamonds[,-c(2,3)]
+par(mfrow=c(2,2))
+sapply(names(diadata),function(cname){hist(diadata[[cname]],main=cname,col="steelblue")})
+```
+
+
+
+summary of data
+========================================================
+```{r, echo=FALSE }
+library(Stat2Data)
+library(skimr)
+data(Diamonds)
+skim(Diamonds)
+```
+
+
+
+References
+========================================================
+
+From **RStudio support**:
+- [Authoring R Presentations](https://support.rstudio.com/hc/en-us/articles/200486468)
+- [Slide Transitions and Navigation](https://support.rstudio.com/hc/en-us/articles/200714013-Slide-Transitions-and-Navigation)
+- [Customizing Fonts and Appearance](https://support.rstudio.com/hc/en-us/articles/200532307)
+- [Displaying and Distributing Presentations](https://support.rstudio.com/hc/en-us/articles/200714023-Displaying-and-Distributing-Presentations)
+
+Additional references:
+- R Markdown [Reference Guide](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
+- [Presentation Ninja](https://slides.yihui.name/xaringan) made using _xaringan_ package by Yihui Xie
