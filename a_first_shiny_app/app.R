@@ -8,19 +8,25 @@
 #
 library(shiny)
 library(shinyjs)
+library(tidyverse)
 library(ggplot2)
 library(Stat2Data)
+data(AHCAvote2017)
+ahcv<-AHCAvote2017
 
-list_choices <-  unique(msleep$vore)[!is.na(unique(msleep$vore))]
-names(list_choices) <- paste(unique(msleep$vore)[!is.na(unique(msleep$vore))],"vore",sep="")
+list_choices <-  unique(ahcv$STATE)[!is.na(unique(ahcv$STATE))]
+names(list_choices) <- paste(unique(ahcv$STATE)[!is.na(unique(ahcv$STATE))],sep="")
 
 # Define UI for application that draws a histogram
 ui <- navbarPage("Shiny app",
-                 tabPanel("msleep",
+                 tabPanel("Introduction",
+                          includeMarkdown("introduction.md")
+                 ),
+                 tabPanel("Data of AHCAvote",
                           fluidPage( 
                               sidebarLayout(
                                   sidebarPanel(
-                                      selectInput("select", label = h3("Plot by type of alimentation"), 
+                                      selectInput("select", label = h3("Plot by the stats"), 
                                                   choices = character(0),
                                                   selected = 1)
                                   ), # sidebarPanel
@@ -66,7 +72,7 @@ ui <- navbarPage("Shiny app",
                  ) #  tabPanel
 ) # navbarPage
 
-col_scale <- scale_colour_discrete(limits = unique(msleep$vore))
+col_scale <- scale_colour_discrete(limits = unique(ahcv$STATE))
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
@@ -80,7 +86,7 @@ server <- function(input, output, session) {
     output$plot <- renderPlot({
         if(input$select != ""){
             # cat(file=stderr(), "input$select:", input$select == "", "\n")
-            ggplot(msleep %>% filter(vore == input$select), aes(bodywt, sleep_total, colour = vore)) +
+            ggplot(ahcv %>% filter(STATE == input$select), aes(uni2015, uniChange, colour = STATE)) +
                 scale_x_log10() +
                 col_scale +
                 geom_point()
@@ -89,11 +95,11 @@ server <- function(input, output, session) {
     
     output$info <- renderTable({
         if(input$select != ""){
-            nearPoints(msleep 
-                       %>% filter(vore == input$select) 
-                       %>% select(name, bodywt,  sleep_total, sleep_rem, sleep_cycle ), 
-                       input$plot_click, threshold = 10, maxpoints = 1,
-                       addDist = TRUE)
+            nearPoints(ahcv 
+                       %>% filter(STATE == input$select) 
+                       %>% select( uni2013, uni2015, uniChange), 
+                       input$plot_click, threshold =0, maxpoints = 1
+                      )
         }
     })
     
@@ -116,22 +122,13 @@ server <- function(input, output, session) {
         # For PDF output, change this to "report.pdf"
         filename = "report.html",
         content = function(file) {
-            # Copy the report file to a temporary directory before processing it, in
-            # case we don't have write permissions to the current working dir (which
-            # can happen when deployed).
             tempReport <- file.path(tempdir(), "report.Rmd")
             file.copy("report.Rmd", tempReport, overwrite = TRUE)
-            
-            # Set up parameters to pass to Rmd document
             params <- list(
                 n_sample = isolate(input$n_sample), 
                 dist = isolate(input$dist), 
                 breaks = if(!isolate(input$auto_bins)) {isolate(input$n_bins)} else {"Sturges"}
             )
-            
-            # Knit the document, passing in the `params` list, and eval it in a
-            # child of the global environment (this isolates the code in the document
-            # from the code in this app).
             rmarkdown::render(tempReport, output_file = file,
                               params = params,
                               envir = new.env(parent = globalenv())
@@ -140,5 +137,4 @@ server <- function(input, output, session) {
     )
 }
 
-# Run the application 
 shinyApp(ui = ui, server = server)
